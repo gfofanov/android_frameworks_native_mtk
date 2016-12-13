@@ -139,6 +139,11 @@ private:
     ~Fence();
 
     int mFenceFd;
+
+#ifdef MTK_HARDWARE
+private:
+    void dump(int fd);
+#endif
 };
 
 }; // namespace android
