@@ -38,6 +38,8 @@ cc_library_shared {
 
         // Don't warn about struct padding
         "-Wno-padded",
+        "-std=c++1y",
+        "-Weverything"
     ],
 
     sanitize: {
@@ -45,6 +47,9 @@ cc_library_shared {
     },
 
     srcs: [
+        "mediatek/Fence.cpp",
+	"mediatek/IDumpTunnel.cpp",
+	"mediatek/RefBaseDump.cpp",
         "ColorSpace.cpp",
         "DebugUtils.cpp",
         "Fence.cpp",
