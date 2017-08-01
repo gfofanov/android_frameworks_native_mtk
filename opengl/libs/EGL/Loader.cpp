@@ -16,7 +16,6 @@
 
 //#define LOG_NDEBUG 0
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
-
 #include <array>
 #include <ctype.h>
 #include <stdlib.h>
@@ -124,12 +123,12 @@ static char const * getProcessCmdline() {
     }
     return NULL;
 }
-
+#ifndef MTK_HARDWARE
 static void* do_dlopen(const char* path, int mode) {
     ATRACE_CALL();
     return dlopen(path, mode);
 }
-
+#endif
 // ----------------------------------------------------------------------------
 
 Loader::driver_t::driver_t(void* gles)
@@ -168,7 +167,7 @@ status_t Loader::driver_t::set(void* hnd, int32_t api)
 }
 
 // ----------------------------------------------------------------------------
-
+#ifndef MTK_HARDWARE
 Loader::Loader()
     : getProcAddress(NULL),
       mLibGui(nullptr),
@@ -186,14 +185,24 @@ Loader::Loader()
     mGetDriverNamespace = reinterpret_cast<decltype(mGetDriverNamespace)>(
             dlsym(mLibGui, "android_getDriverNamespace"));
 }
-
+#else
+Loader::Loader()
+    : getProcAddress(NULL) {
+}
+#endif
 Loader::~Loader() {
+#ifndef MTK_HARDWARE
     if (mLibGui)
         dlclose(mLibGui);
+#endif
 }
 
 static void* load_wrapper(const char* path) {
+#ifndef MTK_HARDWARE
     void* so = do_dlopen(path, RTLD_NOW | RTLD_LOCAL);
+#else
+    void* so = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+#endif
     ALOGE_IF(!so, "dlopen(\"%s\") failed: %s", path, dlerror());
     return so;
 }
@@ -347,8 +356,13 @@ void Loader::init_api(void* dso,
         api++;
     }
 }
-
+#ifndef MTK_HARDWARE
 static void* load_system_driver(const char* kind) {
+#else
+void *Loader::load_driver(const char* kind,
+        egl_connection_t* cnx, uint32_t mask)
+{
+#endif
     ATRACE_CALL();
     class MatchFile {
     public:
@@ -464,8 +478,11 @@ static void* load_system_driver(const char* kind) {
         return 0;
     }
     const char* const driver_absolute_path = absolutePath.string();
-
+#ifndef MTK_HARDWARE
     void* dso = do_dlopen(driver_absolute_path, RTLD_NOW | RTLD_LOCAL);
+#else
+    void* dso = dlopen(driver_absolute_path, RTLD_NOW | RTLD_LOCAL);
+#endif
     if (dso == 0) {
         const char* err = dlerror();
         ALOGE("load_driver(%s): %s", driver_absolute_path, err?err:"unknown");
@@ -473,7 +490,7 @@ static void* load_system_driver(const char* kind) {
     }
 
     ALOGD("loaded %s", driver_absolute_path);
-
+#ifndef MTK_HARDWARE
     return dso;
 }
 
@@ -525,13 +542,16 @@ void *Loader::load_driver(const char* kind,
         if (!dso)
             return NULL;
     }
-
+#endif
     if (mask & EGL) {
         getProcAddress = (getProcAddressType)dlsym(dso, "eglGetProcAddress");
-
+#ifndef MTK_HARDWARE
         ALOGE_IF(!getProcAddress,
                 "can't find eglGetProcAddress() in EGL driver library");
-
+#else
+        ALOGE_IF(!getProcAddress,
+                "can't find eglGetProcAddress() in %s", driver_absolute_path);
+#endif
         egl_t* egl = &cnx->egl;
         __eglMustCastToProperFunctionPointerType* curr =
             (__eglMustCastToProperFunctionPointerType*)egl;
