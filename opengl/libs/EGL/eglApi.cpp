@@ -1867,6 +1867,14 @@ EGLClientBuffer eglCreateNativeClientBufferANDROID(const EGLint *attrib_list)
                     if (value & EGL_NATIVE_BUFFER_USAGE_TEXTURE_BIT_ANDROID) {
                         usage |= GRALLOC_USAGE_HW_TEXTURE;
                     }
+#ifdef MTK_HARDWARE
+                    // The buffer must be used for either a texture or a
+                    // renderbuffer.
+                    if ((value & EGL_NATIVE_BUFFER_USAGE_RENDERBUFFER_BIT_ANDROID) &&
+                        (value & EGL_NATIVE_BUFFER_USAGE_TEXTURE_BIT_ANDROID)) {
+                        return setError(EGL_BAD_PARAMETER, (EGLClientBuffer)0);
+                    }
+#endif
                     break;
                 default:
                     return setError(EGL_BAD_PARAMETER, (EGLClientBuffer)0);
