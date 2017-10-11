@@ -25,7 +25,7 @@
 #include <ui/FloatRect.h>
 #include <ui/Point.h>
 
-#include <android/rect.h>
+#include <ui/rect.h>
 
 namespace android {
 
