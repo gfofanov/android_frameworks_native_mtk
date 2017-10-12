@@ -19,9 +19,10 @@ cc_library_shared {
     clang: true,
     cppflags: [
         "-Weverything",
-        "-Werror",
-
-        // The static constructors and destructors in this library have not been noted to
+         "-Wno-extra-semi",
+         "-Wno-zero-length-array",
+         "-Wno-gnu-statement-expression",
+	"-D__STDC_FORMAT_MACROS",
         // introduce significant overheads
         "-Wno-exit-time-destructors",
         "-Wno-global-constructors",
@@ -86,6 +87,7 @@ cc_library_shared {
         "libsync",
         "libutils",
         "liblog",
+        "libbinder"
     ],
 
     static_libs: [
