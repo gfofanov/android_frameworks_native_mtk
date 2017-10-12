@@ -15,7 +15,7 @@
 #endif
 
 #include <cutils/log.h>
-#include <cutils/process_name.h>
+#include <ui/mediatek/process_name.h>
 #include <cutils/properties.h>
 #include <ui/mediatek/RefBaseDump.h>
 

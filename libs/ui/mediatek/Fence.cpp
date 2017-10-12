@@ -3,6 +3,7 @@
 #include <sync/sync.h>
 #include <ui/Fence.h>
 #include <unistd.h>
+#include <utils/String8.h>
 
 #include <cutils/log.h>
 
